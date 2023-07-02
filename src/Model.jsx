@@ -1,20 +1,14 @@
 import React, { useRef, useLayoutEffect } from "react";
-import { useGLTF, useTexture, useAnimations, useKTX2 } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import {
-  SRGBColorSpace,
-  LinearSRGBColorSpace,
-  RepeatWrapping,
-  MeshStandardMaterial,
-  Color,
-} from "three";
+import { useGLTF, useTexture, useKTX2 } from "@react-three/drei";
+import { SRGBColorSpace, RepeatWrapping } from "three";
 
 export function Model(props) {
   const walls = useRef();
   const cabinet = useRef();
   const cushion = useRef();
   const floor = useRef();
-  const { nodes, materials, animations } = useGLTF("/room.glb");
+  const plint = useRef();
+  const { nodes, materials } = useGLTF("/room.glb");
   const fixAlbedo = (texture, repeat) => {
     texture.flipY = false;
     texture.repeat.set(repeat, repeat);
@@ -44,9 +38,9 @@ export function Model(props) {
     "/bakes/Room_walls_PBR_Lightmap.ktx2",
     "/bakes/Wall Cabinet_ao_PBR_Ambient Occlusion.ktx2",
     "/bakes/WindowCusion_ao_PBR_Ambient Occlusion.ktx2",
-    "/bakes/WindowCusion.001_cushion_PBR_Lightmap.ktx2",
     "/bakes/Floor_LighMap_PBR_Lightmap.ktx2",
     "/bakes/Wall Cabinet_LighMap_PBR_Lightmap.ktx2",
+    "/bakes/Baseboard_LighMap_PBR_Lightmap.ktx2",
   ]);
   fixAlbedo(floorAlbedo, 1);
   fixAlbedo(cushionAlbedo, 10);
@@ -54,15 +48,10 @@ export function Model(props) {
   fixAlbedo(pillow2Albedo, 4);
   fixBake(floorAO);
   fixBaked(bakedTextures);
-  const [
-    wallsAO,
-    wallsLM,
-    cabinetAO,
-    cushionAO,
-    cushionLM,
-    floorLM,
-    cabinetLM,
-  ] = bakedTextures ?? null;
+
+  const [wallsAO, wallsLM, cabinetAO, cushionAO, floorLM, cabinetLM, plintLM] =
+    bakedTextures ?? null;
+
   useLayoutEffect(() => {
     walls.current.geometry.attributes.uv2 =
       walls.current.geometry.attributes.uv;
@@ -72,15 +61,24 @@ export function Model(props) {
       cushion.current.geometry.attributes.uv;
     floor.current.geometry.attributes.uv2 =
       floor.current.geometry.attributes.uv;
+    plint.current.geometry.attributes.uv2 =
+      plint.current.geometry.attributes.uv;
   }, []);
   return (
     <group {...props} dispose={null}>
       <mesh
+        ref={plint}
         geometry={nodes.Baseboard.geometry}
         material={materials["Baseboard_material.001"]}
         position={[-1.496321, 0, 0.207386]}
         scale={[1, 1, 0.821515]}
-      />
+      >
+        <meshStandardMaterial
+          lightMap={plintLM}
+          envMapIntensity={0.6}
+          lightMapIntensity={0.8}
+        />
+      </mesh>
       <mesh
         ref={floor}
         geometry={nodes.Floor.geometry}
@@ -114,8 +112,6 @@ export function Model(props) {
           map={cushionAlbedo}
           aoMap={cushionAO}
           aoMapIntensity={0.6}
-          // lightMap={cushionLM}
-          // lightMapIntensity={2}
         />
       </mesh>
       <group
@@ -145,7 +141,7 @@ export function Model(props) {
       >
         <meshStandardMaterial
           aoMap={wallsAO}
-          aoMapIntensity={0.5}
+          aoMapIntensity={0.8}
           lightMap={wallsLM}
           lightMapIntensity={1.5}
           envMapIntensity={0.9}

@@ -1,5 +1,5 @@
 import LensFlare from "./UltimateLensFlare";
-import { EffectComposer, SMAA, Bloom, N8AO } from "@react-three/postprocessing";
+import { EffectComposer, SMAA, Bloom } from "@react-three/postprocessing";
 import { useControls, folder } from "leva";
 import { Color } from "three";
 
@@ -117,7 +117,6 @@ function Effect() {
       <LensFlare
         // {...lensFlareProps}
         opacity={0.3}
-        // animated={false}
         position={[4, 16, -58]}
         starBurst={false}
         ghostScale={0.28}
@@ -128,11 +127,11 @@ function Effect() {
         dirtTextureFile={"/lensDirtTexture.png"}
       />
       <Bloom
-        intensity={1.4}
-        luminanceThreshold={0.8}
+        intensity={1}
+        luminanceThreshold={0.85}
         luminanceSmoothing={0.07}
       />
-      {/* <SMAA /> */}
+      <SMAA />
     </EffectComposer>
   );
 }
